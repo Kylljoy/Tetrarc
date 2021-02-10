@@ -1,6 +1,5 @@
 ﻿
 import TwoCansAlpha4;
-import Game;
 import Graphics2D;
 import Math;
 import Graphics2DText;
