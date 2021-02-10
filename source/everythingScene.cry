@@ -88,7 +88,7 @@ class everythingScene : AbstractScene{
 			}else{
 				this.cannonicalize();
 				
-				this.activeShape=new shape(Random.randomInt(1,7));
+				this.activeShape=new shape(Random.randomInt(1,8));
 			}
 		Dispatcher.setTimedCallback(this.gameLoop,0.7);
 	}
