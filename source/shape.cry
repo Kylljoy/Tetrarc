@@ -1,0 +1,81 @@
+import Random;
+class shape{
+    field blocks=[];
+    field x=0;
+    field y=0;
+    field color=1;
+
+    constructor(type){
+        this.color=Random.randomInt(1,7);
+        switch(type){
+            case 1:
+            this.blocks.add([0,1]);
+            this.blocks.add([1,0]);
+            this.blocks.add([0,0]);
+            this.blocks.add([1,1]);
+            break;
+            case 2:
+            this.blocks.add([0,0]);
+            this.blocks.add([1,0]);
+            this.blocks.add([2,0]);
+            this.blocks.add([3,0]);
+            break;
+            case 3:
+            this.blocks.add([0,0]);
+            this.blocks.add([0,1]);
+            this.blocks.add([0,2]);
+            this.blocks.add([1,2]);
+            break;
+            case 4:
+            this.blocks.add([0,0]);
+            this.blocks.add([0,1]);
+            this.blocks.add([0,2]);
+            this.blocks.add([-1,2]);
+            break;
+            case 5:
+            this.blocks.add([0,0]);
+            this.blocks.add([0,1]);
+            this.blocks.add([1,1]);
+            this.blocks.add([1,2]);
+            break;
+            case 6:
+            this.blocks.add([0,0]);
+            this.blocks.add([0,1]);
+            this.blocks.add([-1,1]);
+            this.blocks.add([-1,2]);
+            break;
+            default:
+            break;
+        }
+    }
+
+    function rotatedBlocks(){
+        return this.blocks.map((q)=>{return [q[1]+this.x,-q[0]+this.y];});
+    }
+
+    function rotate(){
+        this.blocks=this.blocks.map((q)=>{return [q[1],-q[0]];});
+    }
+
+    function moveDown(){
+        this.y++;
+    }
+
+    function moveLeft(){
+        this.x++;
+    }
+    
+    function moveRight(){
+        this.x--;
+    }
+
+    function getBlocks(x_offset=0,y_offset=0){
+        out=[];
+        for(block:this.blocks){
+            out.add([block[0]+x_offset+this.x,block[1]+this.y+y_offset]);
+        }
+        return out;
+    }
+
+    
+}

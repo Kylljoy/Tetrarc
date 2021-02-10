@@ -1,0 +1,219 @@
+﻿
+import TwoCansAlpha4;
+import Game;
+import Graphics2D;
+import Math;
+import Graphics2DText;
+import Dispatcher;
+import Random;
+
+const COLS=16;
+const ROWS=16;
+const THETA=(2*Math.PI)/COLS;
+const RINGSIZE=Math.abs((0.9*(THETA+2))/(THETA-2));
+const RINGSCALE=4.0;
+class everythingScene : AbstractScene{
+	field r=0.0;
+	field g=0.0;
+	field b=0.0;
+
+	field scoreRenderer=FontResource.fromSystem("Courier New").getRenderer().setColor(255,255,255).setSize(12).setStyle(FontStyle.BOLD);
+
+	field guidelines=false;
+	field score=0;
+	field rs=[200,100,200,0,0,0];
+	field gs=[0,200,0,200,200,0];
+	field bs=[0,0,100,200,0,200];
+	field gameField=[];
+	field activeShape=new shape(2);
+	constructor(){
+		for(y=0;y<ROWS-2;y++){
+			this.gameField.add([]);
+			for(x=0;x<COLS;x++){
+				this.gameField[y].add(0);
+			}
+		}
+		this.gameLoop();
+	}
+
+	//Increasing is left
+	//Decreasing is right
+
+	function rotate(){
+		relatives=[];
+		x=0;
+		y=0;
+		for(x=0;x<this.gameField[0].length;x++){
+			this.gameField.add();
+			for(y=0;y<this.gameField.length;y++){
+			
+			}
+		}
+	}
+
+	function cannonicalize(){
+		for(block:this.activeShape.getBlocks()){
+			this.gameField[block[1]][block[0]%COLS]=this.activeShape.color;
+		}
+		
+	}
+
+	function clearLines(){
+		for(y=this.gameField.length-1;y>=0;y--){
+			if(!this.gameField[y].contains(0)){
+				this.score++;
+				for(i=y;i>=0;i--){
+					this.gameField[i]=this.gameField[i-1].filter((m)=>{return true;});
+				}
+				this.gameField[0]=this.gameField[-1].map((q)=>{return 0;});
+				this.clearLines();
+			}
+		}
+	}
+
+	function areActiveShapes(){
+		return this.gameField.map((q)=>{return q.filter((m)=>{return m>10;}).length>0;}).contains(true);
+	}
+	
+	function addShape(){
+		
+	}
+
+	function gameLoop(){
+		if(this.gameField[0].filter((q)=>{return q>0;}).length>0){
+			return;
+		}
+		this.clearLines();
+		if(this.moveDown()){
+				this.activeShape.moveDown();
+			}else{
+				this.cannonicalize();
+				
+				this.activeShape=new shape(Random.randomInt(1,7));
+			}
+		Dispatcher.setTimedCallback(this.gameLoop,0.7);
+	}
+	
+	function moveDown(){
+		blocks=(this.activeShape.getBlocks(0,1));
+		
+		for(block:blocks){
+			if((block[1]>=this.gameField.length)||this.gameField[block[1]][block[0]%COLS]!=0){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function moveLeft(){
+		blocks=(this.activeShape.getBlocks(1,0));
+		for(block:blocks){
+			if((block[1]>=this.gameField.length)||this.gameField[block[1]][block[0]%COLS]!=0){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function moveRight(){
+		blocks=(this.activeShape.getBlocks(-1,0));
+		for(block:blocks){
+			if((block[1]>=this.gameField.length)||this.gameField[block[1]][block[0]%COLS]!=0){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function rotate(){
+		blocks=(this.activeShape.rotatedBlocks());
+		for(block:blocks){
+			if((block[1]>=this.gameField.length)||this.gameField[block[1]][block[0]%COLS]!=0){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function update(manager,events){
+		if(manager.isKeyPressedThisFrame(KeyboardKey.DOWN)){
+			if(this.moveDown()){
+				this.activeShape.moveDown();
+			}else{
+				this.cannonicalize();
+			}
+		}
+		if(manager.isKeyPressedThisFrame(KeyboardKey.SPACE)){
+			if(this.guidelines){
+				this.guidelines=false;
+			}else{
+				this.guidelines=true;
+			}
+		}
+		if(manager.isKeyPressedThisFrame(KeyboardKey.UP)){
+			if(this.rotate()){
+			this.activeShape.rotate();
+			}
+		}
+		if(manager.isKeyPressedThisFrame(KeyboardKey.RIGHT)){
+			if(this.moveRight()){
+				this.activeShape.moveRight();
+			}
+			
+		}
+		if(manager.isKeyPressedThisFrame(KeyboardKey.LEFT)){
+			if(this.moveLeft()){
+				this.activeShape.moveLeft();
+			}
+		}
+	}
+
+	function render(){
+		Graphics2D.Draw.fill(50*Math.cos(this.r),50*Math.sin(this.g),50*Math.sin(this.b));
+		if(this.guidelines){
+		for(r=0;r<ROWS;r++){
+			for(c=0;c<COLS;c++){
+				Graphics2D.Draw.line((RINGSIZE**r)*RINGSCALE*Math.sin(THETA*c)+300,300-(RINGSIZE**r)*RINGSCALE*Math.cos(THETA*c),(RINGSIZE**r)*RINGSCALE*Math.sin(THETA*(c+1))+300,300-(RINGSIZE**r)*RINGSCALE*Math.cos(THETA*(c+1)),1,255,255,255);
+			}
+			
+		}
+		for(c=0;c<COLS;c++){
+			Graphics2D.Draw.line(300,300,300+(RINGSIZE**(ROWS-1))*RINGSCALE*Math.sin(THETA*c),300-(RINGSIZE**(ROWS-1))*RINGSCALE*Math.cos(THETA*c),1,255,255,255);
+		}
+		}
+
+		for(r=0;r<this.gameField.length;r++){
+			for(c=0;c<this.gameField[r].length;c++){
+				if(this.gameField[r][c]!=0){
+					Graphics2D.Draw.quad(
+						(RINGSIZE**(r+1))*RINGSCALE*Math.sin(THETA*c)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos(THETA*c),
+						(RINGSIZE**(r+1))*RINGSCALE*Math.sin(THETA*(c+1))+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos(THETA*(c+1)),
+						(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin(THETA*(c+1))+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos(THETA*(c+1)),
+						(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin(THETA*(c))+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos(THETA*(c)),
+						this.rs[this.gameField[r][c]-1],this.gs[this.gameField[r][c]-1],this.bs[this.gameField[r][c]-1]);
+				}
+			}
+		}
+
+		
+		for(block:this.activeShape.getBlocks()){
+			c=block[0]%COLS;
+			r=block[1];
+			Graphics2D.Draw.quad(
+				(RINGSIZE**(r+1))*RINGSCALE*Math.sin(THETA*c)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos(THETA*c),
+				(RINGSIZE**(r+1))*RINGSCALE*Math.sin(THETA*(c+1))+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos(THETA*(c+1)),
+				(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin(THETA*(c+1))+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos(THETA*(c+1)),
+				(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin(THETA*(c))+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos(THETA*(c)),
+				this.rs[this.activeShape.color-1],this.gs[this.activeShape.color-1],this.bs[this.activeShape.color-1]);
+		}
+		
+		Graphics2D.Draw.ellipse(300-(RINGSIZE*RINGSCALE),300-(RINGSIZE*RINGSCALE),2*(RINGSIZE*RINGSCALE),2*(RINGSIZE*RINGSCALE),50*Math.cos(this.r),50*Math.sin(this.g),50*Math.sin(this.b));
+		this.scoreRenderer.render(this.score).draw(0,0);
+		this.r+=0.0007;
+		this.g+=0.0009;
+		this.b+=0.001;
+		this.r=this.r%(2*Math.PI);
+		this.g=this.g%(2*Math.PI);
+		this.b=this.b%(2*Math.PI);
+	}
+}
