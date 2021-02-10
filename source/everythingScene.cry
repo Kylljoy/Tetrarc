@@ -155,14 +155,14 @@ class everythingScene : AbstractScene{
 			}
 		}
 		if(manager.isKeyPressedThisFrame(KeyboardKey.RIGHT)){
-			if(this.moveRight()){
-				this.activeShape.moveRight();
+			if(this.moveLeft()){
+				this.activeShape.moveLeft();
 			}
 			
 		}
 		if(manager.isKeyPressedThisFrame(KeyboardKey.LEFT)){
-			if(this.moveLeft()){
-				this.activeShape.moveLeft();
+			if(this.moveRight()){
+				this.activeShape.moveRight();
 			}
 		}
 	}

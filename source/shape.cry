@@ -44,6 +44,11 @@ class shape{
             this.blocks.add([-1,1]);
             this.blocks.add([-1,2]);
             break;
+            case 7:
+            this.blocks.add([0,0]);
+            this.blocks.add([-1,1]);
+            this.blocks.add([0,1]);
+            this.blocks.add([1,1]);
             default:
             break;
         }
