@@ -42,6 +42,15 @@ class everythingScene : AbstractScene{
 	//Increasing is left
 	//Decreasing is right
 
+	function reset(){
+		for(y=0;y<ROWS-2;y++){
+			for(x=0;x<COLS;x++){
+				this.gameField[y][x]=0;
+			}
+		}
+		this.activeShape=new shape(Random.randomInt(1,8));
+
+	}
 	function rotate(){
 		relatives=[];
 		x=0;
@@ -84,6 +93,7 @@ class everythingScene : AbstractScene{
 
 	function gameLoop(){
 		if(this.gameField[0].filter((q)=>{return q>0;}).length>0){
+			Dispatcher.setTimedCallback(this.gameLoop,0.7);
 			return;
 		}
 		this.linescleared=0;
@@ -159,6 +169,12 @@ class everythingScene : AbstractScene{
 	}
 
 	function update(manager,events){
+		if(manager.isKeyPressedThisFrame(KeyboardKey.R)){
+			this.reset();
+		}
+		if(this.gameField[0].filter((q)=>{return q>0;}).length>0){
+			return;
+		}
 		if(this.spin){
 		this.rotation+=0.01;
 		}
@@ -169,13 +185,14 @@ class everythingScene : AbstractScene{
 				this.cannonicalize();
 			}
 		}
-		if(manager.isKeyPressedThisFrame(KeyboardKey.R)){
+		if(manager.isKeyPressedThisFrame(KeyboardKey.Q)){
 			if(this.spin){
 				this.spin=false;
 			}else{
 				this.spin=true;
 			}
 		}
+		
 		if(manager.isKeyPressedThisFrame(KeyboardKey.SPACE)){
 			if(this.guidelines){
 				this.guidelines=false;
