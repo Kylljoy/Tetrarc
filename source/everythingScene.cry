@@ -35,7 +35,7 @@ class everythingScene : AbstractScene{
 				this.gameField[y].add(0);
 			}
 		}
-		Music.loadFromResource("tetrarc.ogg").play("true");
+		Music.loadFromResource("tetrarc.ogg").play(true);
 		this.gameLoop();
 	}
 
@@ -212,7 +212,7 @@ class everythingScene : AbstractScene{
 			
 		}
 		for(c=0;c<COLS;c++){
-			Graphics2D.Draw.line(300,300,300+(RINGSIZE**(ROWS-1))*RINGSCALE*Math.sin(((THETA*c)+this.rotation)+this.rotation),300-(RINGSIZE**(ROWS-1))*RINGSCALE*Math.cos(((THETA*c)+this.rotation)+this.rotation),1,255,255,255);
+			Graphics2D.Draw.line(300,300,300+(RINGSIZE**(ROWS-1))*RINGSCALE*Math.sin(((THETA*c)+this.rotation)),300-(RINGSIZE**(ROWS-1))*RINGSCALE*Math.cos(((THETA*c)+this.rotation)),1,255,255,255);
 		}
 		}
 
