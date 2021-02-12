@@ -17,6 +17,7 @@ class everythingScene : AbstractScene{
 	field g=0.0;
 	field b=0.0;
 
+	field inverted=false;
 	field scoreRenderer=FontResource.fromSystem("Courier New").getRenderer().setColor(255,255,255).setSize(12).setStyle(FontStyle.BOLD);
 	field linescleared=0;
 	field rotation=0.0;
@@ -48,6 +49,7 @@ class everythingScene : AbstractScene{
 				this.gameField[y][x]=0;
 			}
 		}
+		this.score=0;
 		this.activeShape=new shape(Random.randomInt(1,8));
 
 	}
@@ -121,7 +123,6 @@ class everythingScene : AbstractScene{
 				this.activeShape.moveDown();
 			}else{
 				this.cannonicalize();
-				
 				this.activeShape=new shape(Random.randomInt(1,8));
 			}
 		Dispatcher.setTimedCallback(this.gameLoop,0.7);
@@ -183,6 +184,8 @@ class everythingScene : AbstractScene{
 				this.activeShape.moveDown();
 			}else{
 				this.cannonicalize();
+				this.activeShape=new shape(Random.randomInt(1,8));
+				
 			}
 		}
 		if(manager.isKeyPressedThisFrame(KeyboardKey.Q)){
@@ -199,7 +202,15 @@ class everythingScene : AbstractScene{
 			}else{
 				this.guidelines=true;
 			}
+		} 
+		if(manager.isKeyPressedThisFrame(KeyboardKey.I)){
+			if(this.inverted){
+				this.inverted=false;
+			}else{
+				this.inverted=true;
+			}
 		}
+		
 		if(manager.isKeyPressedThisFrame(KeyboardKey.UP)){
 			if(this.rotate()){
 			this.activeShape.rotate();
@@ -232,6 +243,7 @@ class everythingScene : AbstractScene{
 			Graphics2D.Draw.line(300,300,300+(RINGSIZE**(ROWS-1))*RINGSCALE*Math.sin(((THETA*c)+this.rotation)),300-(RINGSIZE**(ROWS-1))*RINGSCALE*Math.cos(((THETA*c)+this.rotation)),1,255,255,255);
 		}
 		}
+		if(!this.inverted){
 
 		for(r=0;r<this.gameField.length;r++){
 			for(c=0;c<this.gameField[r].length;c++){
@@ -257,7 +269,34 @@ class everythingScene : AbstractScene{
 				(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin((THETA*(c))+this.rotation)+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos((THETA*(c))+this.rotation),
 				this.rs[this.activeShape.color-1],this.gs[this.activeShape.color-1],this.bs[this.activeShape.color-1]);
 		}
+		}else{
+			for(t=0;t<this.gameField.length;t++){
+			for(c=0;c<this.gameField[t].length;c++){
+				if(this.gameField[t][c]!=0){
+					r=(this.gameField.length-1)-t;
+					Graphics2D.Draw.quad(
+						(RINGSIZE**(r+1))*RINGSCALE*Math.sin((THETA*c)+this.rotation)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos((THETA*c)+this.rotation),
+						(RINGSIZE**(r+1))*RINGSCALE*Math.sin((THETA*(c+1))+this.rotation)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos((THETA*(c+1))+this.rotation),
+						(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin((THETA*(c+1))+this.rotation)+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos((THETA*(c+1))+this.rotation),
+						(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin((THETA*(c))+this.rotation)+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos((THETA*(c))+this.rotation),
+						this.rs[this.gameField[t][c]-1],this.gs[this.gameField[t][c]-1],this.bs[this.gameField[t][c]-1]);
+				}
+			}
+		}
+
 		
+		for(block:this.activeShape.getBlocks()){
+			c=block[0]%COLS;
+			r=(this.gameField.length-1)-block[1];
+			Graphics2D.Draw.quad(
+				(RINGSIZE**(r+1))*RINGSCALE*Math.sin((THETA*c)+this.rotation)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos((THETA*c)+this.rotation),
+				(RINGSIZE**(r+1))*RINGSCALE*Math.sin((THETA*(c+1))+this.rotation)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos((THETA*(c+1))+this.rotation),
+				(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin((THETA*(c+1))+this.rotation)+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos((THETA*(c+1))+this.rotation),
+				(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin((THETA*(c))+this.rotation)+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos((THETA*(c))+this.rotation),
+				this.rs[this.activeShape.color-1],this.gs[this.activeShape.color-1],this.bs[this.activeShape.color-1]);
+		}
+		}
+
 		Graphics2D.Draw.ellipse(300-(RINGSIZE*RINGSCALE),300-(RINGSIZE*RINGSCALE),2*(RINGSIZE*RINGSCALE),2*(RINGSIZE*RINGSCALE),50*Math.cos(this.r),50*Math.sin(this.g),50*Math.sin(this.b));
 		this.scoreRenderer.render(this.score).draw(0,0);
 		this.r+=0.0007;
