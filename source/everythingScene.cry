@@ -5,6 +5,7 @@ import Math;
 import Graphics2DText;
 import Dispatcher;
 import Random;
+import Audio;
 
 const COLS=16;
 const ROWS=16;
@@ -17,9 +18,11 @@ class everythingScene : AbstractScene{
 	field b=0.0;
 
 	field scoreRenderer=FontResource.fromSystem("Courier New").getRenderer().setColor(255,255,255).setSize(12).setStyle(FontStyle.BOLD);
-
+	field linescleared=0;
+	field rotation=0.0;
 	field guidelines=false;
 	field score=0;
+	field spin=true;
 	field rs=[200,100,200,0,0,0];
 	field gs=[0,200,0,200,200,0];
 	field bs=[0,0,100,200,0,200];
@@ -32,6 +35,7 @@ class everythingScene : AbstractScene{
 				this.gameField[y].add(0);
 			}
 		}
+		Music.loadFromResource("tetrarc.ogg").play("true");
 		this.gameLoop();
 	}
 
@@ -60,7 +64,7 @@ class everythingScene : AbstractScene{
 	function clearLines(){
 		for(y=this.gameField.length-1;y>=0;y--){
 			if(!this.gameField[y].contains(0)){
-				this.score++;
+				this.linescleared++;
 				for(i=y;i>=0;i--){
 					this.gameField[i]=this.gameField[i-1].filter((m)=>{return true;});
 				}
@@ -82,7 +86,27 @@ class everythingScene : AbstractScene{
 		if(this.gameField[0].filter((q)=>{return q>0;}).length>0){
 			return;
 		}
+		this.linescleared=0;
 		this.clearLines();
+		switch(this.linescleared){
+			case 0:
+				break;
+			case 1:
+				this.score+=1;
+				break;
+			case 2:
+				this.score+=3;
+				break;
+			case 3:
+				this.score+=5;
+				break;
+			case 4:
+				this.score+=7;
+				break;
+			default:
+				this.score+=10;
+				break;
+		}
 		if(this.moveDown()){
 				this.activeShape.moveDown();
 			}else{
@@ -135,11 +159,21 @@ class everythingScene : AbstractScene{
 	}
 
 	function update(manager,events){
+		if(this.spin){
+		this.rotation+=0.01;
+		}
 		if(manager.isKeyPressedThisFrame(KeyboardKey.DOWN)){
 			if(this.moveDown()){
 				this.activeShape.moveDown();
 			}else{
 				this.cannonicalize();
+			}
+		}
+		if(manager.isKeyPressedThisFrame(KeyboardKey.R)){
+			if(this.spin){
+				this.spin=false;
+			}else{
+				this.spin=true;
 			}
 		}
 		if(manager.isKeyPressedThisFrame(KeyboardKey.SPACE)){
@@ -168,16 +202,17 @@ class everythingScene : AbstractScene{
 	}
 
 	function render(){
+	
 		Graphics2D.Draw.fill(50*Math.cos(this.r),50*Math.sin(this.g),50*Math.sin(this.b));
 		if(this.guidelines){
 		for(r=0;r<ROWS;r++){
 			for(c=0;c<COLS;c++){
-				Graphics2D.Draw.line((RINGSIZE**r)*RINGSCALE*Math.sin(THETA*c)+300,300-(RINGSIZE**r)*RINGSCALE*Math.cos(THETA*c),(RINGSIZE**r)*RINGSCALE*Math.sin(THETA*(c+1))+300,300-(RINGSIZE**r)*RINGSCALE*Math.cos(THETA*(c+1)),1,255,255,255);
+				Graphics2D.Draw.line((RINGSIZE**r)*RINGSCALE*Math.sin((THETA*c)+this.rotation)+300,300-(RINGSIZE**r)*RINGSCALE*Math.cos((THETA*c)+this.rotation),(RINGSIZE**r)*RINGSCALE*Math.sin((THETA*(c+1))+this.rotation)+300,300-(RINGSIZE**r)*RINGSCALE*Math.cos((THETA*(c+1))+this.rotation),1,255,255,255);
 			}
 			
 		}
 		for(c=0;c<COLS;c++){
-			Graphics2D.Draw.line(300,300,300+(RINGSIZE**(ROWS-1))*RINGSCALE*Math.sin(THETA*c),300-(RINGSIZE**(ROWS-1))*RINGSCALE*Math.cos(THETA*c),1,255,255,255);
+			Graphics2D.Draw.line(300,300,300+(RINGSIZE**(ROWS-1))*RINGSCALE*Math.sin(((THETA*c)+this.rotation)+this.rotation),300-(RINGSIZE**(ROWS-1))*RINGSCALE*Math.cos(((THETA*c)+this.rotation)+this.rotation),1,255,255,255);
 		}
 		}
 
@@ -185,10 +220,10 @@ class everythingScene : AbstractScene{
 			for(c=0;c<this.gameField[r].length;c++){
 				if(this.gameField[r][c]!=0){
 					Graphics2D.Draw.quad(
-						(RINGSIZE**(r+1))*RINGSCALE*Math.sin(THETA*c)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos(THETA*c),
-						(RINGSIZE**(r+1))*RINGSCALE*Math.sin(THETA*(c+1))+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos(THETA*(c+1)),
-						(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin(THETA*(c+1))+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos(THETA*(c+1)),
-						(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin(THETA*(c))+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos(THETA*(c)),
+						(RINGSIZE**(r+1))*RINGSCALE*Math.sin((THETA*c)+this.rotation)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos((THETA*c)+this.rotation),
+						(RINGSIZE**(r+1))*RINGSCALE*Math.sin((THETA*(c+1))+this.rotation)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos((THETA*(c+1))+this.rotation),
+						(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin((THETA*(c+1))+this.rotation)+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos((THETA*(c+1))+this.rotation),
+						(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin((THETA*(c))+this.rotation)+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos((THETA*(c))+this.rotation),
 						this.rs[this.gameField[r][c]-1],this.gs[this.gameField[r][c]-1],this.bs[this.gameField[r][c]-1]);
 				}
 			}
@@ -199,10 +234,10 @@ class everythingScene : AbstractScene{
 			c=block[0]%COLS;
 			r=block[1];
 			Graphics2D.Draw.quad(
-				(RINGSIZE**(r+1))*RINGSCALE*Math.sin(THETA*c)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos(THETA*c),
-				(RINGSIZE**(r+1))*RINGSCALE*Math.sin(THETA*(c+1))+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos(THETA*(c+1)),
-				(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin(THETA*(c+1))+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos(THETA*(c+1)),
-				(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin(THETA*(c))+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos(THETA*(c)),
+				(RINGSIZE**(r+1))*RINGSCALE*Math.sin((THETA*c)+this.rotation)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos((THETA*c)+this.rotation),
+				(RINGSIZE**(r+1))*RINGSCALE*Math.sin((THETA*(c+1))+this.rotation)+300,300-(RINGSIZE**(r+1))*RINGSCALE*Math.cos((THETA*(c+1))+this.rotation),
+				(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin((THETA*(c+1))+this.rotation)+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos((THETA*(c+1))+this.rotation),
+				(RINGSIZE**((r+1)+1))*RINGSCALE*Math.sin((THETA*(c))+this.rotation)+300,300-(RINGSIZE**((r+1)+1))*RINGSCALE*Math.cos((THETA*(c))+this.rotation),
 				this.rs[this.activeShape.color-1],this.gs[this.activeShape.color-1],this.bs[this.activeShape.color-1]);
 		}
 		
